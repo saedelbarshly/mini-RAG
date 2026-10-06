@@ -18,7 +18,7 @@ async def uploadData(project_id: str, file: UploadFile, app_setting: Setting = D
     if not is_valid:
         return JSONResponse(
             status_code = status.HTTP_400_BAD_REQUEST,
-            contend = {
+            content = {
                 "signal": result_signal
             }
         )
@@ -31,12 +31,12 @@ async def uploadData(project_id: str, file: UploadFile, app_setting: Setting = D
     )
 
     async with aiofiles.open(file_path, "wb") as f:
-        while chunk := file.read(app_setting.FILE_DEFAULT_CHUNK_SIZE):
+        while chunk := await file.read(app_setting.FILE_DEFAULT_CHUNK_SIZE):
             await f.write(chunk)
 
 
     return JSONResponse(
-            contend = {
+            content = {
                 "signal": ResponseSignal.FILE_UPLOAD_SUCCESS.value
             }
         )
