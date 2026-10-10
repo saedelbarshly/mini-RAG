@@ -62,19 +62,20 @@ async def uploadData(project_id: str, file: UploadFile, app_setting: Setting = D
         )
     
     
-@data_router.post("/porcess/{project_id}")
+@data_router.post("/process/{project_id}")
 async def process_project(project_id: str, process_request: ProcessRequest):
+    
     file_id = process_request.file_id   
     chunk_size = process_request.chunk_size   
     chunk_overlap = process_request.overlap_size
     
     process_controller = ProcessController(project_id=project_id)  
     file_content = process_controller.get_file_content(file_id=file_id)
+
     file_chunks = process_controller.process_file_content(
         file_content=file_content,
-        file_id=file_id
-        chunk_size=chunk_size=
-        chunk_overlap=chunk_overlap=
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap
     )
     
     if file_chunks is None or len(file_chunks) == 0:
