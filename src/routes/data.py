@@ -69,8 +69,25 @@ async def process_project(project_id: str, process_request: ProcessRequest):
     chunk_size = process_request.chunk_size   
     chunk_overlap = process_request.overlap_size
     
-    process_controller = ProcessController(project_id=project_id)  
+    process_controller = ProcessController(project_id=project_id)
+
+    if not process_controller.is_file_exists(file_id=file_id):
+        return JSONResponse(
+            status_code = status.HTTP_404_NOT_FOUND,
+            content = {
+                "signal": ResponseSignal.FILE_NOT_FOUND.value
+            }
+        )
+
     file_content = process_controller.get_file_content(file_id=file_id)
+
+    if file_content is None:
+        return JSONResponse(
+            status_code = status.HTTP_400_BAD_REQUEST,
+            content = {
+                "signal": ResponseSignal.FILE_TYPE_NOT_SUPPORTED.value
+            }
+        )
 
     file_chunks = process_controller.process_file_content(
         file_content=file_content,
