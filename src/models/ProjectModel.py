@@ -7,22 +7,35 @@ from .enums.DataBaseEnum import DataBaseEnum
 class ProjectModel(BaseDataModel):
     def __init__(self, db_client: object):
         super().__init__(db_client=db_client)
-        self.collection = db_client[DataBaseEnum.Collection_PROJECTS.value]
+        self.collection = db_client[DataBaseEnum.COLLECTION_PROJECTS.value]
 
+    @classmethod
+    async def create_instance(cls, db_client: object):
+        instance = cls(db_client)
+        await instance.init_collection()
+        return instance
+        
+        
+    async def init_collection(self):
+        all_collection = await self.db_client.list_collection_names()
+        if DataBaseEnum.COLLECTION_PROJECTS.value not in all_collection:
+            self.collection = self.db_client[DataBaseEnum.COLLECTION_PROJECTS.value]
+            indexes = Project.get_indexes()
+            for index in indexes:
+                await self.collection.create_index(
+                    index["key"],
+                    name=index["name"],
+                    unique=index['unique']
+                )
+            
 
-    async def create_project(self, project_data: dict) -> Project:
-        """
-        Create a new project in the database.
+    async def create_project(self, project: Project):
 
-        Args:
-            project_data (dict): The data for the new project.
-
-        Returns:
-            Project: The created project object.
-        """
-        project = Project(**project_data)
         result = await self.collection.insert_one(project.dict(by_alias=True, exclude_unset=True))
+        project.id = result.inserted_id
+
         return project
+
 
     async def get_project(self, project_id: str) -> Project:
         """
@@ -55,7 +68,7 @@ class ProjectModel(BaseDataModel):
         """  
         project = await self.get_project(project_id=project_id)
         if not project:
-            project = await self.create_project(project_data={"project_id": project_id})
+            project = await self.create_project(project=project)
         return project
 
 

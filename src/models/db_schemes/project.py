@@ -17,3 +17,17 @@ class Project(BaseModel):
     
     class Config:
         arbitrary_types_allowed = True  #to ignor object id or unknow error 
+        
+        
+    @classmethod   # this is static method caalling dir by class
+    def get_indexes(cls):
+        return [
+            {
+                #key name unique
+                "key": [
+                    ("project_id", 1)
+                ],
+                "name": "project_id_index_1",
+                "unique": True
+            }
+        ]    
