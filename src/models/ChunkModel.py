@@ -12,7 +12,7 @@ class ChunkModel(BaseDataModel):
 
     async def create_chunk(self, chunk_data: dict) -> DataChunk:
         chunk = DataChunk(**chunk_data)
-        result =    await self.collection.insert_one(chunk.dict())
+        result =    await self.collection.insert_one(chunk.dict(by_alias=True, exclude_unset=True))
         return chunk    
 
 
@@ -27,7 +27,7 @@ class ChunkModel(BaseDataModel):
         for i in range(0, len(chunks), batch_size):
             batch = chunks[i:i + batch_size]
             operations = [
-                InsertOne(chunk.dict())
+                InsertOne(chunk.dict(by_alias=True, exclude_unset=True))
                 for chunk in batch
             ]
             await self.collection.bulk_write(operations)
