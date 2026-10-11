@@ -1,5 +1,6 @@
 from enum import Enum
 
 class DataBaseEnum(Enum):
-    Collection_PROJECTS = "projects"
-    Collection_CHUNKS = "chunks"
+    COLLECTION_PROJECTS = "projects"
+    COLLECTION_CHUNKS = "chunks"
+    COLLECTION_ASSET = "asset"

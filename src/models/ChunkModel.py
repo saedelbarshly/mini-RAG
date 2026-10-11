@@ -7,7 +7,7 @@ from pymongo import InsertOne
 class ChunkModel(BaseDataModel):
     def __init__(self, db_client: object):
         super().__init__(db_client=db_client)
-        self.collection = db_client[DataBaseEnum.Collection_CHUNKS.value]
+        self.collection = db_client[DataBaseEnum.COLLECTION_CHUNKS.value]
 
 
     @classmethod
@@ -19,8 +19,8 @@ class ChunkModel(BaseDataModel):
         
     async def init_collection(self):
         all_collection = await self.db_client.list_collection_names()
-        if DataBaseEnum.Collection_CHUNKS.value not in all_collection:
-            self.collection = self.db_client[DataBaseEnum.Collection_CHUNKS.value]
+        if DataBaseEnum.COLLECTION_CHUNKS.value not in all_collection:
+            self.collection = self.db_client[DataBaseEnum.COLLECTION_CHUNKS.value]
             indexes = DataChunk.get_indexes()
             for index in indexes:
                 await self.collection.create_index(
