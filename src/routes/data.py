@@ -16,7 +16,6 @@ from models.ChunkModel import ChunkModel
 
 
 
-
 logger = logging.getLogger('uvicorn.error')
 
 
@@ -28,7 +27,7 @@ data_router = APIRouter(
 @data_router.post("/upload/{project_id}")
 async def uploadData(request: Request, project_id: str, file: UploadFile, app_setting: Setting = Depends(get_settings)):
 
-    project_model = ProjectModel(
+    project_model = await ProjectModel.create_instance(
         db_client=request.app.db_client
     )
 
@@ -87,7 +86,7 @@ async def process_project(request: Request, project_id: str, process_request: Pr
     chunk_overlap = process_request.overlap_size
     do_reset = process_request.do_reset
 
-    project_model = ProjectModel(
+    project_model = await ProjectModel.create_instance(
         db_client=request.app.db_client
     )
 
@@ -139,7 +138,7 @@ async def process_project(request: Request, project_id: str, process_request: Pr
         for i, chunk in enumerate(file_chunks)
     ]
 
-    chunk_model = ChunkModel(
+    chunk_model = await ChunkModel.create_instance(
         db_client=request.app.db_client
     )
 
