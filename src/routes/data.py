@@ -6,14 +6,14 @@ import os
 from helpers.config import get_settings, Setting
 from controllers import DataController, ProjectController, ProcessController
 import aiofiles
-from models import ResponseSignal
+from models import ResponseSignal,AssetType
 import logging
 
-from models.db_schemes.data_chunk import DataChunk
+from models.db_schemes import DataChunk, Asset
 from .schemes.data import ProcessRequest
 from models.ProjectModel import ProjectModel
 from models.ChunkModel import ChunkModel
-
+from models.AssetModel import AssetModel
 
 
 logger = logging.getLogger('uvicorn.error')
@@ -69,11 +69,25 @@ async def uploadData(request: Request, project_id: str, file: UploadFile, app_se
                 "signal": ResponseSignal.FILE_UPLOAD_FAILED.value
             }
         )
+        
+    # store asset into database    
+    asset_model  = await AssetModel.creat_instance(
+        db_client=request.app.db_client
+    )
+    
+    asset_resource = Asset(
+        asset_project_id=project.id,
+        asset_type=AssetType.FILE.value,
+        asset_name=file_id,
+        asset_size=os.path.getsize(file_path)
+    )
+    
+    asset_record = await asset_model.create_asset(asset=asset_resource)
 
     return JSONResponse(
             content = {
                 "signal": ResponseSignal.FILE_UPLOAD_SUCCESS.value,
-                "file_id": file_id,
+                "file_id": str(asset_record.id),
             }
         )
     
