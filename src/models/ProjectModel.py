@@ -35,6 +35,10 @@ class ProjectModel(BaseDataModel):
             Project: The retrieved project object.
         """
         project = await self.collection.find_one({"project_id": project_id})
+
+        if project is None:
+            return None
+        
         return Project(**project)
 
 
