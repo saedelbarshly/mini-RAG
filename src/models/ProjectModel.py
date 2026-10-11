@@ -28,20 +28,14 @@ class ProjectModel(BaseDataModel):
                     unique=index['unique']
                 )
             
-            
-    async def create_project(self, project_data: dict) -> Project:
-        """
-        Create a new project in the database.
 
-        Args:
-            project_data (dict): The data for the new project.
+    async def create_project(self, project: Project):
 
-        Returns:
-            Project: The created project object.
-        """
-        project = Project(**project_data)
         result = await self.collection.insert_one(project.dict(by_alias=True, exclude_unset=True))
+        project.id = result.inserted_id
+
         return project
+
 
     async def get_project(self, project_id: str) -> Project:
         """
@@ -74,7 +68,7 @@ class ProjectModel(BaseDataModel):
         """  
         project = await self.get_project(project_id=project_id)
         if not project:
-            project = await self.create_project(project_data={"project_id": project_id})
+            project = await self.create_project(project=project)
         return project
 
 
