@@ -80,7 +80,7 @@ async def uploadData(request: Request, project_id: str, file: UploadFile, app_se
     
     
 @data_router.post("/process/{project_id}")
-async def process_project(project_id: str, process_request: ProcessRequest):
+async def process_project(request: Request, project_id: str, process_request: ProcessRequest):
     
     file_id = process_request.file_id   
     chunk_size = process_request.chunk_size   
