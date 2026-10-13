@@ -27,7 +27,7 @@ class OpenAIProvider(LLMInterface):
         
         self.client = OpenAI(
             api_key = self.api_key,
-            api_url = self.api_url
+            base_url = self.api_url
         )
         
         self.logger = logging.getLogger(__name__)
@@ -54,23 +54,22 @@ class OpenAIProvider(LLMInterface):
         
         max_output_tokens = max_output_tokens if max_output_tokens is not None else self.default_generation_max_output_tokens
         temperature = temperature if temperature is not None else self.default_generation_temperature
-        chat_history.append(
+        messages = list(chat_history) + [
             self.construct_prompt(prompt=prompt,role=OpenAIEnum.USER.value)
-        )
-        
+        ]
+
         response = self.client.responses.create(
             model=self.generation_model_id,
-            reasoning={"effort": "low"},    
-            input=chat_history,
+            input=messages,
             max_output_tokens = max_output_tokens,
             temperature = temperature
         )
-        
+
         if not response or not response.output_text:
             self.logger.error("Error while generation text with OpenAI")
             return None
-            
-        return response.choices[0].message["content"]
+
+        return response.output_text
     
     
     def embed_text(self, text: str, document_type: str=None):
@@ -87,7 +86,7 @@ class OpenAIProvider(LLMInterface):
             input = text
         )
         
-        if not response or not response.data or len(response.data) == 0 or not response.data[0].embeddings:
+        if not response or not response.data or len(response.data) == 0 or not response.data[0].embedding:
             self.logger.error("Error while embedding text with OpenAI")
             return None
         
