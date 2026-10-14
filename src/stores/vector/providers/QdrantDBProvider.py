@@ -9,22 +9,22 @@ class QdrantDBProvider(VectorDBInterface):
     
     def __init__(self, db_path: str, distance_method: str):
         self.db_path = db_path
-        self.distance_method = None
         self.client = None
         
         if distance_method == DistanceMethodEnums.COSINE.value:
             self.distance_method = models.Distance.COSINE
             
         if distance_method == DistanceMethodEnums.DOT.value:
-            self.distance_method = models.Distance.DOT
-        
+            self.distance_method = models.Distance.DOT  
+                 
         self.logger = logging.getLogger(__name__)
-        
+
     def connect(self):
-        self.client = QdrantClient(path=self.db_path)
-        
+            self.client = QdrantClient(path=self.db_path)
     def disconnect(self):
-        return self.client = None
+        if self.client is not None:
+            self.client.close()
+        self.client = None
     
     def is_collection_existed(self, collection_name: str) -> bool:
         return self.client.collection_exists(collection_name=collection_name)
@@ -84,15 +84,16 @@ class QdrantDBProvider(VectorDBInterface):
                         vector=vector,
                         payload={
                             "text": text,
-                            "metadat": metadata
+                            "metadata": metadata
                         }
                     )
                 ]
             )
-            
+
         except Exception as e:
             self.logger.error(f"Error while insert one: {e}")
-        
+            return False
+
         return True
     
     
@@ -110,6 +111,11 @@ class QdrantDBProvider(VectorDBInterface):
         
         if metadata is None:
             metadata = [None] * len(texts)
+
+        if not (len(texts) == len(vectors) == len(metadata)) or \
+                (record_ids is not None and len(record_ids) != len(texts)):
+            self.logger.error("texts, vectors, metadata and record_ids must have the same length")
+            return False
             
         # Qdrant point ids must be an unsigned int or a UUID
         if record_ids is None:
@@ -128,7 +134,7 @@ class QdrantDBProvider(VectorDBInterface):
                     vector=batch_vectors[x],
                     payload={
                         "text": batch_texts[x],
-                        "metadat": batch_metadata[x]
+                        "metadata": batch_metadata[x]
                     }
                  )
                 for x in range(len(batch_texts))
@@ -141,7 +147,8 @@ class QdrantDBProvider(VectorDBInterface):
                 )
             except Exception as e:
                 self.logger.error(f"Error while inserting batch: {e}")
-            
+                return False
+
         return True
         
 
