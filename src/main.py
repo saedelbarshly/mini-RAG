@@ -3,6 +3,7 @@ from routes import base, data
 from motor.motor_asyncio import AsyncIOMotorClient
 from helpers.config import get_settings
 from stores.llm.LLMFactory import LLMFactory
+from stores.vector.VectorDBFactory import VectorDBFactory
 
 app = FastAPI()
 
@@ -20,6 +21,9 @@ async def startup_db_clinet():
     app.embedding_client = llm_provider_factory.create(provider=settings.EMBEDDING_BACKEND)
     app.embedding_client.set_embedding_model(model_id=settings.EMBEDDING_MODEL_ID, embedding_size=settings.EMBEDDING_MODEL_SIZE)
     
+    
+    vector_db_provider_factory = VectorDBFactory(settings)
+    app.vector_db = vector_db_provider_factory.create(provider=settings.VECTOR_DB_BACKEND)
     
 @app.on_event("shutdown")         
 async def shutdown_db_client():
