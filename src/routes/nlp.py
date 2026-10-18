@@ -33,7 +33,7 @@ async def index_project(request: Request,project_id: str,push_request: PushReque
     
     if not project:
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_RQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST,
             content={
                 "signal": ResponseSignal.PROJECT_NOT_FOUND.value
             }
@@ -71,16 +71,16 @@ async def index_project(request: Request,project_id: str,push_request: PushReque
         
         if not is_inserted:
             return JSONResponse(
-                status_code=status.HTTP_400_BAD_RQUEST,
+                status_code=status.HTTP_400_BAD_REQUEST,
                 content={
-                    "signal": ResponseSignal.INSERT_INOT_VECTOR_DB_ERROR.value
+                    "signal": ResponseSignal.INSERT_INTO_VECTOR_DB_ERROR.value
                 }
             )
         inserted_item_count += len(page_chunks)
     
     return JSONResponse(
          content={
-                "signal": ResponseSignal.INSERT_INOT_VECTOR_DB_SUCCESS.value,
+                "signal": ResponseSignal.INSERT_INTO_VECTOR_DB_SUCCESS.value,
                 "inserted_item_count": inserted_item_count
             }
     )
@@ -115,7 +115,7 @@ async def index_info(request: Request,project_id: str):
     )
     
 
-@nlp_router.post("index/search/{project_id}")
+@nlp_router.post("/index/search/{project_id}")
 async def search_index(request: Request, project_id: str, search_request: SearchRequest):
     
     project_model = await ProjectModel.create_instance(
@@ -138,7 +138,7 @@ async def search_index(request: Request, project_id: str, search_request: Search
     
     if not results:
         return JSONResponse(
-            status_code=status.HTTP_400_BAD_RQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST,
             content={
                 "signal": ResponseSignal.VECTOR_DB_SEARCH_ERROR.value
             }
