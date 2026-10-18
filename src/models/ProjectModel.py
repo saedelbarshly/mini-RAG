@@ -68,7 +68,7 @@ class ProjectModel(BaseDataModel):
         """  
         project = await self.get_project(project_id=project_id)
         if not project:
-            project = await self.create_project(project=project)
+            project = await self.create_project(project=Project(project_id=project_id))
         return project
 
 
