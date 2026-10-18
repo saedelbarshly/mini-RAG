@@ -1,5 +1,3 @@
-from urllib import request
-
 from fastapi import FastAPI, APIRouter, Depends, UploadFile, status, Request
 from fastapi.responses import JSONResponse 
 import os
