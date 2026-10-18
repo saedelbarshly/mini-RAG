@@ -12,3 +12,7 @@ class ResponseSignal(Enum):
 
     PROCESSING_SUCCESS  = "Processing_success"
     PROCESSING_FAILED  = "Processing_failed"
+    
+    PROJECT_NOT_FOUND = "project_not_found"
+    INSERT_INTO_VECTOR_DB_ERROR = "insert_into_vector_db_error"
+    INSERT_INTO_VECTOR_DB_SUCCESS = "insert_into_vector_db_success"
