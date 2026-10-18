@@ -1,5 +1,3 @@
-from urllib import request
-
 from fastapi import FastAPI, APIRouter, Depends, UploadFile, status, Request
 from fastapi.responses import JSONResponse 
 import os
@@ -146,7 +144,7 @@ async def process_project(request: Request, project_id: str, process_request: Pr
     
     if len(project_file_ids) == 0:
         return JSONResponse(
-            status_code = status.HTTP_400_BAD_RQUEST,
+            status_code = status.HTTP_400_BAD_REQUEST,
             content = {
                 "signal": ResponseSignal.NO_FIELS_ERROR.value
             }

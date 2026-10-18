@@ -119,7 +119,8 @@ class QdrantDBProvider(VectorDBInterface):
             
         # Qdrant point ids must be an unsigned int or a UUID
         if record_ids is None:
-            record_ids = [str(uuid.uuid4()) for _ in range(len(texts))]
+            # record_ids = [str(uuid.uuid4()) for _ in range(len(texts))]
+            record_ids = list(range(0, len(texts)))
 
         for i in range(0, len(texts), batch_size):
             batch_end = i + batch_size
