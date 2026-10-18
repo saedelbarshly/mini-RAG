@@ -24,7 +24,7 @@ class NLPController(BaseController):
     def get_vector_db_collection_info(self, project: Project):
         collection_name = self.create_collection_name(project_id=project.project_id)
         collection_info = self.vector_db_client.get_collection_info(collection_name=collection_name)
-        return json.load(
+        return json.loads(
             json.dumps(collection_info, default=lambda x: x.__dict__)
         )
     
@@ -40,7 +40,7 @@ class NLPController(BaseController):
 
         vectors = [
             self.embedding_client.embed_text(
-                text=texts,
+                text=text,
                 document_type=DocumentTypeEnum.DOCUMENT.value
                 )
             for text in texts
@@ -88,7 +88,7 @@ class NLPController(BaseController):
         if not results:
             return False
         
-        return json.load(
+        return json.loads(
             json.dumps(results, default=lambda x: x.__dict__)
         )
         
