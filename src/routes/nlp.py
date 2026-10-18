@@ -45,11 +45,15 @@ async def index_project(request: Request,project_id: str,push_request: PushReque
        embedding_client=request.app.embedding_client
     )
     
+    # reset once before indexing, not on every page (that would wipe earlier pages)
+    if push_request.do_reset:
+        _ = nlp_controller.reset_vector_db_collection(project_id=project.project_id)
+
     has_records = True
     page_no = 1
     inserted_item_count = 0
     idx = 0
-    
+
     while has_records:
         page_chunks = await chunk_model.get_project_chunk(project_id=project.id, page_no=page_no)
         if len(page_chunks):
@@ -65,7 +69,7 @@ async def index_project(request: Request,project_id: str,push_request: PushReque
         is_inserted = nlp_controller.index_into_vector_db(
             project=project,
             chunks=page_chunks,
-            do_reset=push_request.do_reset,
+            do_reset=False,
             chunks_ids=chunks_ids
         )
         
