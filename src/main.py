@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import base, data
+from routes import base, data, nlp
 from motor.motor_asyncio import AsyncIOMotorClient
 from helpers.config import get_settings
 from stores.llm.LLMFactory import LLMFactory
@@ -23,18 +23,19 @@ async def startup_db_clinet():
     
     
     vector_db_provider_factory = VectorDBFactory(settings)
-    app.vector_db = vector_db_provider_factory.create(provider=settings.VECTOR_DB_BACKEND)
-    if app.vector_db is None:
+    app.vector_db_client = vector_db_provider_factory.create(provider=settings.VECTOR_DB_BACKEND)
+    if app.vector_db_client is None:
         raise ValueError(f"Unsupported VECTOR_DB_BACKEND: {settings.VECTOR_DB_BACKEND!r}")
-    app.vector_db.connect()
+    app.vector_db_client.connect()
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
     app.mongo_conn.close()
-    app.vector_db.disconnect()
+    app.vector_db_client.disconnect()
 
 
 app.include_router(base.base_router)
 app.include_router(data.data_router)
+app.include_router(nlp.nlp_router)
 
 
