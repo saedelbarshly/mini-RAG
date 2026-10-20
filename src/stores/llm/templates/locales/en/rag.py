@@ -6,7 +6,7 @@ from string import Template
 
 #### System ####
 
-system_prompt = "\n".join([
+system_prompt = Template("\n".join([
     "You are an assistant to generate a response for the user.",
     "You will be provided by a set of documents associated with the user's query.",
     "You have to generate a response based on the documents provided.",
@@ -15,7 +15,7 @@ system_prompt = "\n".join([
     "You have to generate response in the same language as the user's query.",
     "Be polite and respectful to the user.",
     "Be precise and concise in your response. Avoid unnecessary information.",
-])
+]))
 
 
 #### Document ####
