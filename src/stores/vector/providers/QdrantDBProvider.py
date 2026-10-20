@@ -4,6 +4,7 @@ import logging
 import uuid
 from qdrant_client import models, QdrantClient
 from typing import List
+from models.db_schemes import RetrievedDocument
 
 class QdrantDBProvider(VectorDBInterface):
     
@@ -153,9 +154,23 @@ class QdrantDBProvider(VectorDBInterface):
         return True
         
 
-    def search_by_vector(self, collection_name: str, vector: List, limit: int = 5) -> List:
-        return self.client.query_points(collection_name=collection_name, query=vector, limit=limit).points
+    def search_by_vector(self, collection_name: str, vector: List, limit: int = 5) -> List[RetrievedDocument]:
         
+        results = self.client.query_points(
+            collection_name=collection_name,
+            query=vector,
+            limit=limit
+            ).points
         
+        if not results or len(results) == 0:
+            return None
+
+        return [
+            RetrievedDocument(**{
+                "score": result.score,
+                "text": result.payload["text"]
+            })
+            for result in results
+        ]
 
             
