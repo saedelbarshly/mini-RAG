@@ -27,6 +27,7 @@ class CoHereProvider(LLMInterface):
         
         self.client = cohere.ClientV2(api_key=self.api_key)
         
+        self.enums = CoHereEnum
         self.logger = logging.getLogger(__name__)
        
        
