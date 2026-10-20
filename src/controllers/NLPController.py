@@ -114,7 +114,7 @@ class NLPController(BaseController):
                     "doc_num": idx + 1,
                     "chunk_text": doc.text,
             })
-           for doc in enumerate(retrieved_documents)
+           for idx, doc in enumerate(retrieved_documents)
         ])
         
         footer_prompt = self.template_parser.get(
@@ -124,11 +124,11 @@ class NLPController(BaseController):
         chat_history = [
             self.generation_client.construct_prompt(
                 prompt=system_prompt,
-                role=self.embedding_client.enums.SYSTEM.value
+                role=self.generation_client.enums.SYSTEM.value
             )
         ]
         
-        full_prompt = "\n\n".join({document_prompts, footer_prompt})
+        full_prompt = "\n\n".join([document_prompts, footer_prompt])
         
         answer = self.generation_client.generate_text(
             prompt=full_prompt,
