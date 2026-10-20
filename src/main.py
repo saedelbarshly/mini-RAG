@@ -4,6 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from helpers.config import get_settings
 from stores.llm.LLMFactory import LLMFactory
 from stores.vector.VectorDBFactory import VectorDBFactory
+from stores.llm.templates.template_parser import TemplateParser
 
 app = FastAPI()
 
@@ -27,6 +28,12 @@ async def startup_db_clinet():
     if app.vector_db_client is None:
         raise ValueError(f"Unsupported VECTOR_DB_BACKEND: {settings.VECTOR_DB_BACKEND!r}")
     app.vector_db_client.connect()
+    
+    app.template_parser = TemplateParser(
+        language=settings.PRIMARY_LANG,
+        default_language=settings.DEFAULT_LANG
+    )
+    
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
