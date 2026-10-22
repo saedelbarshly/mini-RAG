@@ -19,7 +19,7 @@ class DataController(BaseController):
         return True, ResponseSignal.FILE_UPLOAD_SUCCESS.value
 
 
-    def generate_unique_filepath(self, orig_file_name: str, project_id: str):
+    def generate_unique_filepath(self, orig_file_name: str, project_id: int):
 
         project_path = ProjectController().get_porject_path(project_id=project_id)
 

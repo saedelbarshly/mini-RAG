@@ -23,7 +23,7 @@ data_router = APIRouter(
 )
 
 @data_router.post("/upload/{project_id}")
-async def uploadData(request: Request, project_id: str, file: UploadFile, app_setting: Setting = Depends(get_settings)):
+async def uploadData(request: Request, project_id: int, file: UploadFile, app_setting: Setting = Depends(get_settings)):
 
     project_model = await ProjectModel.create_instance(
         db_client=request.app.db_client
@@ -91,7 +91,7 @@ async def uploadData(request: Request, project_id: str, file: UploadFile, app_se
     
     
 @data_router.post("/process/{project_id}")
-async def process_project(request: Request, project_id: str, process_request: ProcessRequest):
+async def process_project(request: Request, project_id: int, process_request: ProcessRequest):
     
     chunk_size = process_request.chunk_size   
     chunk_overlap = process_request.overlap_size
@@ -112,11 +112,19 @@ async def process_project(request: Request, project_id: str, process_request: Pr
     project = await project_model.get_project(
         project_id=project_id
     )
-    
+
+    if not project:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "signal": ResponseSignal.PROJECT_NOT_FOUND.value
+            }
+        )
+
     project_file_ids = {}
     if process_request.file_id:
         asset_record = await asset_model.get_asset_record(
-            asset_project_id=str(project.id),
+            asset_project_id=project.id,
             asset_name=process_request.file_id
         )
         if asset_record is None:
@@ -133,7 +141,7 @@ async def process_project(request: Request, project_id: str, process_request: Pr
         
     else:
         project_files = await asset_model.get_all_project_assets(
-            asset_project_id=str(project.id),
+            asset_project_id=project.id,
             asset_type=AssetType.FILE.value
         )
         
