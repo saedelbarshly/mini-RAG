@@ -9,7 +9,7 @@ class Asset(SQLAlchemyBase):
     
     __tablename__ = "assets"
     
-    asset_id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     asset_uuid = Column(UUID(as_uuid=True), default=uuid.uuid4, unique=True, nullable=False)
     
     asset_type = Column(String, nullable=False)
@@ -17,13 +17,14 @@ class Asset(SQLAlchemyBase):
     asset_size = Column(Integer, nullable=False)
     asset_config = Column(JSONB, nullable=True)
     
-    asset_project_id = Column(Integer, ForeignKey("projects.project_id"), nullable=False)
+    asset_project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     
     # relationship
     project = relationship("Project", back_populates="assets")
+    chunks = relationship("DataChunk", back_populates="asset")
     
     # index
     __table_args__= (
