@@ -30,7 +30,13 @@ class Setting(BaseSettings):
     VECTOR_DB_NAME: str
     VECTOR_DB_DISTANCE_METHOD: Optional[str] = None
     VECTOR_DB_URL: Optional[str] = None
-    
+
+    POSTGRES_USERNAME: Optional[str] = None
+    POSTGRES_PASSWORD: Optional[str] = None
+    POSTGRES_HOST: Optional[str] = None
+    POSTGRES_PORT: Optional[int] = None
+    POSTGRES_MAIN_DATABASE: Optional[str] = None
+
     PRIMARY_LANG: str="en"
     DEFAULT_LANG: str="en"
 
