@@ -44,7 +44,7 @@ async def startup_db_clinet():
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    app.db_engine.dispose()
+    await app.db_engine.dispose()
     app.vector_db_client.disconnect()
 
 
