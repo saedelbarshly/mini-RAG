@@ -13,17 +13,17 @@ class NLPController(BaseController):
         self.template_parser = template_parser
         
     
-    def create_collection_name(self, project_id: str):
+    def create_collection_name(self, project_id: int):
         return f"collection_{project_id}".strip()
     
     
-    def reset_vector_db_collection(self, project_id: str):
+    def reset_vector_db_collection(self, project_id: int):
         collection_name = self.create_collection_name(project_id=project_id)
         return self.vector_db_client.delete_collection(collection_name=collection_name)
     
     
     def get_vector_db_collection_info(self, project: Project):
-        collection_name = self.create_collection_name(project_id=project.project_id)
+        collection_name = self.create_collection_name(project_id=project.id)
         collection_info = self.vector_db_client.get_collection_info(collection_name=collection_name)
         return json.loads(
             json.dumps(collection_info, default=lambda x: x.__dict__)
@@ -33,7 +33,7 @@ class NLPController(BaseController):
     def index_into_vector_db(self, project: Project, chunks: List[DataChunk], chunks_ids: List[int], do_reset: bool = False):
         
         # step1: get collection name
-        collection_name = self.create_collection_name(project_id=project.project_id)
+        collection_name = self.create_collection_name(project_id=project.id)
         
         #step2: mange items
         texts = [ c.chunk_text for c in chunks]
@@ -68,7 +68,7 @@ class NLPController(BaseController):
     
     def search_vector_db_collection(self, project: Project, text: str, limit: int = 50):
         
-        collection_name = self.create_collection_name(project_id=project.project_id)
+        collection_name = self.create_collection_name(project_id=project.id)
 
         vector = self.embedding_client.embed_text(
                 text=text,
@@ -112,7 +112,7 @@ class NLPController(BaseController):
         document_prompts = "\n".join([
             self.template_parser.get("rag", "document_prompt", {
                     "doc_num": idx + 1,
-                    "chunk_text": doc.text,
+                    "chunk_text": self.generation_client.process_text(doc.text),
             })
            for idx, doc in enumerate(retrieved_documents)
         ])
