@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Optional
+from typing import Optional, List
 
 class Setting(BaseSettings):
     APP_NAME: str
@@ -26,10 +26,12 @@ class Setting(BaseSettings):
     GENERATION_DEFAULT_MAX_TOKENS: int = None
     GENERATION_DEFAULT_TEMPERATURE: float = None
     
+    VECTOR_DB_BACKEND_LITREAL: List[str] = None
     VECTOR_DB_BACKEND: str
     VECTOR_DB_NAME: str
     VECTOR_DB_DISTANCE_METHOD: Optional[str] = None
     VECTOR_DB_URL: Optional[str] = None
+    VECTOR_DB_PGVECTOR_INDEX_THRESHOLD: int
 
     POSTGRES_USERNAME: Optional[str] = None
     POSTGRES_PASSWORD: Optional[str] = None
