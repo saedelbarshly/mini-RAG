@@ -16,3 +16,5 @@ SQLAlchemy==2.1.6
 asyncpg==0.32.0
 alembic==1.20.1
 psycopg2==2.9.13
+pgvector==0.5.1
+nltk==3.10.4

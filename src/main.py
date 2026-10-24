@@ -30,11 +30,11 @@ async def startup_db_clinet():
     app.embedding_client.set_embedding_model(model_id=settings.EMBEDDING_MODEL_ID, embedding_size=settings.EMBEDDING_MODEL_SIZE)
     
     
-    vector_db_provider_factory = VectorDBFactory(settings)
+    vector_db_provider_factory = VectorDBFactory(config=settings, db_client=app.db_client)
     app.vector_db_client = vector_db_provider_factory.create(provider=settings.VECTOR_DB_BACKEND)
     if app.vector_db_client is None:
         raise ValueError(f"Unsupported VECTOR_DB_BACKEND: {settings.VECTOR_DB_BACKEND!r}")
-    app.vector_db_client.connect()
+    await app.vector_db_client.connect()
     
     app.template_parser = TemplateParser(
         language=settings.PRIMARY_LANG,
@@ -45,7 +45,7 @@ async def startup_db_clinet():
 @app.on_event("shutdown")
 async def shutdown_db_client():
     await app.db_engine.dispose()
-    app.vector_db_client.disconnect()
+    await app.vector_db_client.disconnect()
 
 
 app.include_router(base.base_router)
