@@ -17,7 +17,7 @@ nlp_router = APIRouter(
 )
 
 @nlp_router.post("/index/push/{project_id}")
-async def index_project(request: Request,project_id: str,push_request: PushRequest):
+async def index_project(request: Request,project_id: int,push_request: PushRequest):
     
     project_model = await ProjectModel.create_instance(
         db_client=request.app.db_client
@@ -48,7 +48,7 @@ async def index_project(request: Request,project_id: str,push_request: PushReque
     
     # reset once before indexing, not on every page (that would wipe earlier pages)
     if push_request.do_reset:
-        _ = nlp_controller.reset_vector_db_collection(project_id=project.project_id)
+        _ = nlp_controller.reset_vector_db_collection(project_id=project.id)
 
     has_records = True
     page_no = 1
@@ -92,7 +92,7 @@ async def index_project(request: Request,project_id: str,push_request: PushReque
     
 
 @nlp_router.get("/index/info/{project_id}")
-async def index_info(request: Request,project_id: str):
+async def index_info(request: Request,project_id: int):
     
     project_model = await ProjectModel.create_instance(
         db_client=request.app.db_client
@@ -101,6 +101,14 @@ async def index_info(request: Request,project_id: str):
     project = await project_model.get_project(
         project_id=project_id
     )
+    
+    if not project:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "signal": ResponseSignal.PROJECT_NOT_FOUND.value
+            }
+        )
     
     nlp_controller = NLPController(
        vector_db_client=request.app.vector_db_client,
@@ -122,7 +130,7 @@ async def index_info(request: Request,project_id: str):
     
 
 @nlp_router.post("/index/search/{project_id}")
-async def search_index(request: Request, project_id: str, search_request: SearchRequest):
+async def search_index(request: Request, project_id: int, search_request: SearchRequest):
     
     project_model = await ProjectModel.create_instance(
         db_client=request.app.db_client
@@ -131,6 +139,14 @@ async def search_index(request: Request, project_id: str, search_request: Search
     project = await project_model.get_project(
         project_id=project_id
     )
+    
+    if not project:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "signal": ResponseSignal.PROJECT_NOT_FOUND.value
+            }
+        )
     
     nlp_controller = NLPController(
        vector_db_client=request.app.vector_db_client,
@@ -160,7 +176,7 @@ async def search_index(request: Request, project_id: str, search_request: Search
     
 
 @nlp_router.post("/index/answer/{project_id}")
-async def answer_rag(request: Request, project_id: str, search_request: SearchRequest):
+async def answer_rag(request: Request, project_id: int, search_request: SearchRequest):
     
     project_model = await ProjectModel.create_instance(
         db_client=request.app.db_client
@@ -169,6 +185,14 @@ async def answer_rag(request: Request, project_id: str, search_request: SearchRe
     project = await project_model.get_project(
         project_id=project_id
     )
+    
+    if not project:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "signal": ResponseSignal.PROJECT_NOT_FOUND.value
+            }
+        )
     
     nlp_controller = NLPController(
        vector_db_client=request.app.vector_db_client,
