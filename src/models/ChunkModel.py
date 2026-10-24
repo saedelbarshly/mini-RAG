@@ -2,7 +2,7 @@ from .BaseDataModel import BaseDataModel
 from .db_schemes import DataChunk
 from .enums.DataBaseEnum import DataBaseEnum
 from sqlalchemy.future import select
-from sqlalchemy import delete
+from sqlalchemy import delete, func
 
 class ChunkModel(BaseDataModel):
     def __init__(self, db_client: object):
@@ -62,3 +62,12 @@ class ChunkModel(BaseDataModel):
 
             result = await session.execute(query)
             return result.scalars().all()
+        
+        
+    async def get_total_chunk_count(self, project_id: int):
+        async with self.db_client() as session:
+            count_sql = select(func.count(DataChunk.id)).where(DataChunk.chunk_project_id == project_id)
+            records_count = await session.execute(count_sql)
+
+            return records_count.scalar()
+        
