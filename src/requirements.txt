@@ -12,7 +12,9 @@ motor==3.7.1
 openai==3.29.0
 cohere==7.2.0
 qdrant-client==1.19.1
-SQLAlchemy==2.1.6
+SQLAlchemy[asyncio]==2.1.6
 asyncpg==0.32.0
 alembic==1.20.1
 psycopg2==2.9.13
+pgvector==0.5.1
+nltk==3.10.4
