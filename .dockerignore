@@ -1,0 +1,12 @@
+.git
+**/__pycache__
+**/*.pyc
+
+# secrets: real values come from docker/env/ at runtime
+**/.env
+**/.env.*
+src/models/db_schemes/minirag/alembic.ini
+
+# local uploads and vector data
+src/assets/files
+src/assets/database
