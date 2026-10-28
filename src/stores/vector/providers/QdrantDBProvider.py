@@ -8,8 +8,9 @@ from models.db_schemes import RetrievedDocument
 
 class QdrantDBProvider(VectorDBInterface):
     
-    def __init__(self, db_client: str, default_vector_size: int = 512, distance_method: str = None, index_threshold: int = 100):
+    def __init__(self, db_client: str, db_url: str = None, default_vector_size: int = 512, distance_method: str = None, index_threshold: int = 100):
         self.db_client = db_client
+        self.db_url = db_url
         self.client = None
         self.default_vector_size = default_vector_size
 
@@ -21,7 +22,12 @@ class QdrantDBProvider(VectorDBInterface):
         self.logger = logging.getLogger('uvicorn')
 
     async def connect(self):
+        # local path mode locks the folder to one process, so multi-worker deployments need the server
+        if self.db_url:
+            self.client = QdrantClient(url=self.db_url)
+        else:
             self.client = QdrantClient(path=self.db_client)
+
     async def disconnect(self):
         if self.client is not None:
             self.client.close()
