@@ -18,6 +18,7 @@ class VectorDBFactory:
 
             return QdrantDBProvider(
                 db_client=qdrant_db__client,
+                db_url=self.config.VECTOR_DB_URL,
                 distance_method=self.config.VECTOR_DB_DISTANCE_METHOD,
                 default_vector_size=self.config.EMBEDDING_MODEL_SIZE,
                 index_threshold=self.config.VECTOR_DB_PGVECTOR_INDEX_THRESHOLD
