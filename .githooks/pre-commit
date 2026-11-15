@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+# git commit --no-verify can skip this hook, so CI must repeat these checks.
+status=0
+
+# Suppress diff content so diagnostics cannot disclose staged secrets.
+if ! git diff --cached --check >/dev/null 2>&1; then
+    printf '%s\n' 'pre-commit: whitespace check failed; fix staged whitespace errors.' >&2
+    status=1
+fi
+
+if staged_diff=$(git diff --cached --no-ext-diff --no-textconv --no-color -U0); then
+    added_lines=$(printf '%s\n' "$staged_diff" | grep -E '^\+')
+    patterns=(
+        'BEGIN [A-Z ]*PRIVATE KEY'
+        'AKIA[0-9A-Z]{16}'
+        'ghp_[A-Za-z0-9]{36}'
+        'xox[baprs]-'
+        "(password|secret|api_key|token)[[:space:]]*[=:][[:space:]]*['\"][^'\"]{8,}['\"]"
+    )
+    labels=('private key' 'AWS access key' 'GitHub token' 'Slack token' 'credential assignment')
+    for i in "${!patterns[@]}"; do
+        if printf '%s\n' "$added_lines" | grep -Ei -- "${patterns[$i]}" >/dev/null; then
+            printf 'pre-commit: possible %s in staged added lines (value redacted).\n' "${labels[$i]}" >&2
+            status=1
+        fi
+    done
+else
+    printf '%s\n' 'pre-commit: could not read the staged diff; secret check failed.' >&2
+    status=1
+fi
+
+exit "$status"
