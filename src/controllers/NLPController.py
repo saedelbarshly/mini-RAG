@@ -1,8 +1,11 @@
 from .BaseController import BaseController
 from models.db_schemes import Project, DataChunk
-from typing import List
+from typing import List, Optional
 from stores.llm.LLMEnums import DocumentTypeEnum
 import json
+import logging
+
+
 class NLPController(BaseController):
     def __init__(self, vector_db_client, generation_client, embedding_client, template_parser):
         super().__init__()
@@ -11,6 +14,7 @@ class NLPController(BaseController):
         self.generation_client = generation_client
         self.embedding_client = embedding_client
         self.template_parser = template_parser
+        self.logger = logging.getLogger(__name__)
         
     
     def create_collection_name(self, project_id: int):
@@ -94,18 +98,65 @@ class NLPController(BaseController):
             return False
         
         return results
-        
-        
-    async def answer_rag_question(self, project: Project, query: str, limit=10):
-        answer, full_prompt,chat_history = None, None , None
+
+    def rewrite_query(self, query: str, chat_history: Optional[List[dict]] = None):
+        if not query or not query.strip():
+            self.logger.error("Cannot rewrite an empty query")
+            return None
+
+        system_prompt = self.template_parser.get("query_rewriting", "system_prompt")
+        if not system_prompt:
+            self.logger.error("Query rewriting system prompt was not available")
+            return None
+
+        prompt_history = [
+            self.generation_client.construct_prompt(
+                prompt=system_prompt,
+                role=self.generation_client.enums.SYSTEM.value
+            )
+        ]
+        for message in chat_history or []:
+            prompt_history.append(
+                self.generation_client.construct_prompt(
+                    prompt=message["content"],
+                    role=message["role"]
+                )
+            )
+
+        rewritten_query = self.generation_client.generate_text(
+            prompt=query.strip(),
+            chat_history=prompt_history,
+            temperature=0
+        )
+        if not rewritten_query or not rewritten_query.strip():
+            self.logger.error("Query rewriting did not return a usable query")
+            return None
+
+        return rewritten_query.strip()
+
+    async def answer_rag_question(
+        self,
+        project: Project,
+        query: str,
+        limit=10,
+        chat_history: Optional[List[dict]] = None
+    ):
+        answer, full_prompt, response_chat_history = None, None, None
+        rewritten_query = self.rewrite_query(
+            query=query,
+            chat_history=chat_history
+        )
+        if not rewritten_query:
+            return answer, full_prompt, response_chat_history, rewritten_query
+
         retrieved_documents = await self.search_vector_db_collection(
             project=project,
-            text=query,
+            text=rewritten_query,
             limit=limit
         )
         
         if not retrieved_documents or len(retrieved_documents) == 0:
-            return answer, full_prompt,chat_history
+            return answer, full_prompt, response_chat_history, rewritten_query
         
         # step2: construct LLM prompt
         
@@ -127,7 +178,7 @@ class NLPController(BaseController):
             }
         )
         
-        chat_history = [
+        response_chat_history = [
             self.generation_client.construct_prompt(
                 prompt=system_prompt,
                 role=self.generation_client.enums.SYSTEM.value
@@ -138,10 +189,10 @@ class NLPController(BaseController):
         
         answer = self.generation_client.generate_text(
             prompt=full_prompt,
-            chat_history=chat_history
+            chat_history=response_chat_history
         )
         
-        return answer, full_prompt,chat_history 
+        return answer, full_prompt, response_chat_history, rewritten_query
         
         
         

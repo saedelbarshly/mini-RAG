@@ -169,9 +169,24 @@ async def search_index(request: Request, project_id: int, search_request: Search
        embedding_client=request.app.embedding_client,
        template_parser=request.app.template_parser
     )
+
+    rewritten_query = nlp_controller.rewrite_query(
+        query=search_request.text,
+        chat_history=[
+            {"role": message.role, "content": message.content}
+            for message in search_request.chat_history
+        ]
+    )
+    if not rewritten_query:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "signal": ResponseSignal.QUERY_REWRITING_ERROR.value
+            }
+        )
     
     results = await nlp_controller.search_vector_db_collection(
-        project=project, text=search_request.text, limit=search_request.limit
+        project=project, text=rewritten_query, limit=search_request.limit
     )
     
     if not results:
@@ -185,6 +200,7 @@ async def search_index(request: Request, project_id: int, search_request: Search
     return JSONResponse(
         content={
             "signal": ResponseSignal.VECTOR_DB_SEARCH_SUCCESS.value,
+            "rewritten_query": rewritten_query,
             "results": [ result.dict() for result in results]
         }
     )
@@ -216,10 +232,14 @@ async def answer_rag(request: Request, project_id: int, search_request: SearchRe
        template_parser=request.app.template_parser
     )
     
-    answer, full_prompt, chat_history = await nlp_controller.answer_rag_question(
+    answer, full_prompt, chat_history, rewritten_query = await nlp_controller.answer_rag_question(
         project=project,
         query=search_request.text,
         limit=search_request.limit,
+        chat_history=[
+            {"role": message.role, "content": message.content}
+            for message in search_request.chat_history
+        ]
     )
     
     if not answer:
@@ -234,6 +254,7 @@ async def answer_rag(request: Request, project_id: int, search_request: SearchRe
         content={
             "signal": ResponseSignal.VECTOR_DB_SEARCH_SUCCESS.value,
             "answer": answer,
+            "rewritten_query": rewritten_query,
             "chat_history": chat_history,
             "full_prompt": full_prompt,
         }
