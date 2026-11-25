@@ -45,3 +45,9 @@ POSTGRES_HOST=pgvector
 POSTGRES_PORT=5432
 POSTGRES_MAIN_DATABASE=minirag
 
+# =================== auth =================== #
+
+# Generate with: python -c "import secrets; print(secrets.token_hex(32))"
+SECRET_KEY=
+ALGORITHM="HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES=60
