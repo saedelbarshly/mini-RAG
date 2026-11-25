@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routes import base, data, nlp
+from routes import base, data, nlp, user
 from helpers.config import get_settings
 from stores.llm.LLMFactory import LLMFactory
 from stores.vector.VectorDBFactory import VectorDBFactory
@@ -55,5 +55,6 @@ async def shutdown_db_client():
 app.include_router(base.base_router)
 app.include_router(data.data_router)
 app.include_router(nlp.nlp_router)
+app.include_router(user.user_router)
 
 

@@ -10,7 +10,7 @@ class Setting(BaseSettings):
     FILE_DEFAULT_CHUNK_SIZE: int
     MONGODB_URL: str
     MONGODB_DATABASE: str
-    
+
     GENERATION_BACKEND: str
     EMBEDDING_BACKEND: str
 
@@ -25,7 +25,7 @@ class Setting(BaseSettings):
     INPUT_DEFAULT_MAX_CHARACTERS: int = None
     GENERATION_DEFAULT_MAX_TOKENS: int = None
     GENERATION_DEFAULT_TEMPERATURE: float = None
-    
+
     VECTOR_DB_BACKEND_LITREAL: List[str] = None
     VECTOR_DB_BACKEND: str
     VECTOR_DB_NAME: str
@@ -41,6 +41,10 @@ class Setting(BaseSettings):
 
     PRIMARY_LANG: str="en"
     DEFAULT_LANG: str="en"
+
+    SECRET_KEY: str
+    ALGORITHM: str="HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int=60
 
     class Config:
         env_file = ".env"
